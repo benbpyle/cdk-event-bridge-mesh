@@ -19,38 +19,8 @@ export class EventBridgeRule extends Construct {
     ) {
         super(scope, id);
         this.buildBusOneRule(scope, props);
+        this.buildBusTwoRule(scope, props);
     }
-
-    // private buildCompanyUpdatedRule = (
-    //     scope: Construct,
-    //     props: EventBridgeRuleStackProps
-    // ) => {
-    //     const rule = new Rule(this, "CompanyUpdated-Rule", {
-    //         eventPattern: {
-    //             detailType: ["CompanyChange", "CompanyLocationChange"],
-    //         },
-    //         ruleName: "company-updated",
-    //         eventBus: props.bus,
-    //     });
-
-    //     const dlq = new Queue(this, "CompanyUpdatedDLQ");
-
-    //     const role = new Role(this, "CompanyUpdated-Role", {
-    //         assumedBy: new ServicePrincipal("events.amazonaws.com"),
-    //     });
-
-    //     rule.addTarget(
-    //         new targets.SfnStateMachine(props.companyStateMachine, {
-    //             input: RuleTargetInput,
-    //             deadLetterQueue: dlq,
-    //             role: role,
-    //         })
-    //     );
-
-    //     // {
-    //     //     "detail-type": ["CompanyChange", "CompanyLocationChange"]
-    //     //   }
-    // };
 
     private buildBusOneRule = (
         scope: Construct,
@@ -78,29 +48,30 @@ export class EventBridgeRule extends Construct {
         );
     };
 
-    // private buildUserAccountUpdatedRule = (
-    //     props: EventBridgeRuleStackProps
-    // ) => {
-    //     const rule = new Rule(this, "UserAccountUpdated-Rule", {
-    //         eventPattern: {
-    //             detailType: ["UserAccountUpdated"],
-    //         },
-    //         ruleName: "resource-management-user-account-updated",
-    //         eventBus: props.bus,
-    //     });
+    private buildBusTwoRule = (
+        scope: Construct,
+        props: EventBridgeRuleStackProps
+    ) => {
+        const rule = new Rule(this, "SampleEventSM-Rule", {
+            eventPattern: {
+                detailType: ["Busing"],
+            },
+            ruleName: "bus-two-busing",
+            eventBus: props.busTwo,
+        });
 
-    //     const dlq = new Queue(this, "UserAccountUpdated-DLQ");
+        const dlq = new Queue(this, "SampleEventSM-DLQ");
 
-    //     const role = new Role(this, "UserAccountUpdated-Role", {
-    //         assumedBy: new ServicePrincipal("events.amazonaws.com"),
-    //     });
+        const role = new Role(this, "SampleEventSM-Role", {
+            assumedBy: new ServicePrincipal("events.amazonaws.com"),
+        });
 
-    //     rule.addTarget(
-    //         new targets.SfnStateMachine(props.bus, {
-    //             input: RuleTargetInput,
-    //             deadLetterQueue: dlq,
-    //             role: role,
-    //         })
-    //     );
-    // };
+        rule.addTarget(
+            new targets.SfnStateMachine(props.stateMachine, {
+                input: RuleTargetInput,
+                deadLetterQueue: dlq,
+                role: role,
+            })
+        );
+    };
 }
